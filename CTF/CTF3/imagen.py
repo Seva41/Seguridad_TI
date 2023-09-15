@@ -1,6 +1,6 @@
 from scapy.all import *
 
-# Read the image file and convert it to binary data
+# Lee la imagen a enviar en bytes
 image_path = r"C:\Users\sebad\OneDrive - Universidad Adolfo Ibanez\Ayudantía Pregrado\Seguridad TI 2023-2\CTF\CTF3\chilean_hotdog.jpg"
 with open(image_path, "rb") as image_file:
     image_data = image_file.read()
@@ -17,7 +17,7 @@ ip = IP(
     chksum=0,
 )
 
-# Create a TCP segment
+# Crea el paquete TCP
 tcp = TCP(
     sport=12345,
     dport=80,
@@ -27,19 +27,18 @@ tcp = TCP(
     chksum=0,
 )
 
+# Define el paquete completo
 packet = eth / ip / tcp / Raw(load=image_data)
 
-
+# Borra los checksums para que Scapy los calcule automáticamente
 del packet[IP].chksum
 del packet[TCP].chksum
 
-# Insert your image data into the payload
-
-
+# Recalcula los checksums
 packet = packet.__class__(bytes(packet))
 
-# Define the output .pcap file name
+# Define el path del archivo .pcap
 output_pcap = "imagen.pcap"
 
-# Write the packet to the .pcap file
+# Escribe el paquete en el archivo .pcap
 wrpcap(output_pcap, packet)
