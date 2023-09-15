@@ -1,5 +1,7 @@
 from scapy.all import *
 import random
+import struct
+import socket
 
 
 def imagen(packets, sec):
@@ -20,16 +22,52 @@ def imagen(packets, sec):
     )  # MAC origen Apple, MAC destino Intel
     ip = IP(src="192.168.0.10", dst="192.168.0.1")
 
+    # Define unique source and destination port numbers for TCP
     sport = random.randint(1024, 65535)
     dport = 80
-    sec = sec + len(encrypted_image_data)
+    seq = sec + len(encrypted_image_data)
     tcp = TCP(sport=sport, dport=dport, flags="S", seq=sec + 1)
+
+    # Manually calculate and set TCP checksum
+    pseudo_header = struct.pack(
+        "!4s4sBBH",
+        socket.inet_aton(ip.src),
+        socket.inet_aton(ip.dst),
+        0,
+        ip.proto,
+        len(tcp),
+    )
+    checksum = sum(
+        struct.unpack("!H", pseudo_header[i : i + 2])[0]
+        for i in range(0, len(pseudo_header), 2)
+    )
+    checksum += sum(
+        struct.unpack("!H", tcp)[0]
+        for tcp in struct.pack(
+            "!HHH",
+            int(ip.src.split(".")[0]),
+            int(ip.src.split(".")[1]),
+            int(ip.src.split(".")[2]),
+        )
+    )
+    checksum += sum(
+        struct.unpack("!H", tcp)[0]
+        for tcp in struct.pack(
+            "!HHH",
+            int(ip.dst.split(".")[0]),
+            int(ip.dst.split(".")[1]),
+            int(ip.dst.split(".")[2]),
+        )
+    )
+    checksum += socket.IPPROTO_TCP + len(tcp)
+    checksum = (checksum >> 16) + (checksum & 0xFFFF)
+    tcp.chksum = socket.htons((checksum & 0xFFFF) + (checksum >> 16))
 
     # Define el paquete con los datos de la imagen encriptada
     packet = eth / ip / tcp / encrypted_image_data
     packets.append(packet)
 
-    return packets, sec
+    return packets, seq
 
 
 def fake(packets, sec):
@@ -42,7 +80,7 @@ def fake(packets, sec):
         b"gg ez",
         b"viva mexico y los tacos",
     ]
-    random_message = random.choice(garbage_messages)
+    random_message = random.choice(garbage_messages)  # Move random_message here
 
     # Define los paquetes a enviar (ethernet, ip, tcp, datos)
     eth = Ether(
@@ -50,6 +88,7 @@ def fake(packets, sec):
     )  # MAC origen Samsung, MAC destino Intel
     ip = IP(src="192.168.0.15", dst="192.168.0.1")
 
+    # Define unique source and destination port numbers for TCP
     sport = random.randint(1024, 65535)
     dport = 80
 
