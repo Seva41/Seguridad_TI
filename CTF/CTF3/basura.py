@@ -110,7 +110,7 @@ tcp = TCP(
     sport=12326,
     dport=80,
     flags="S",
-    seq=3680,
+    seq=0,
     options=[("Timestamp", (0, 0))],
     chksum=0,
 )
