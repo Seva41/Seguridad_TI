@@ -1,11 +1,17 @@
 from scapy.all import *
+import random
+import struct
+import socket
+from socket import inet_aton
 
-# Lee la imagen a enviar en bytes
+# Define the path to the image
 image_path = r"C:\Users\sebad\OneDrive - Universidad Adolfo Ibanez\Ayudantía Pregrado\Seguridad TI 2023-2\CTF\CTF3\chilean_hotdog.jpg"
+
+# Read the image file as bytes
 with open(image_path, "rb") as image_file:
     image_data = image_file.read()
 
-# Define los paquetes a enviar (ethernet, ip, tcp, datos)
+# Ethernet frame
 eth = Ether(dst="fc:f8:ae:33:44:55", src="fc:fc:48:dd:ee:ff")
 ip = IP(
     src="192.168.0.10",
