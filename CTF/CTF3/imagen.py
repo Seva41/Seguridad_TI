@@ -1,43 +1,79 @@
 from scapy.all import *
+import random
+import struct
+import socket
+from socket import inet_aton
 
-# Lee la imagen a enviar en bytes
+# Define the path to the image
 image_path = r"C:\Users\sebad\OneDrive - Universidad Adolfo Ibanez\Ayudantía Pregrado\Seguridad TI 2023-2\CTF\CTF3\chilean_hotdog.jpg"
+
+# Read the image file as bytes
 with open(image_path, "rb") as image_file:
     image_data = image_file.read()
 
-# Define los paquetes a enviar (ethernet, ip, tcp, datos)
+# Ethernet frame
 eth = Ether(dst="fc:f8:ae:33:44:55", src="fc:fc:48:dd:ee:ff")
-ip = IP(
-    src="192.168.0.10",
-    dst="192.168.0.1",
-    ttl=64,
-    flags="DF",
-    id=32711,
-    len=8200,
-    chksum=0,
-)
 
-# Crea el paquete TCP
-tcp = TCP(sport=12345, dport=80, flags="S", seq=1000)
+# IP packet
+ip = IP(src="192.168.0.10", dst="192.168.0.1")
 
-# Calculate the total length of the IP packet
-ip_length = len(ip) + len(tcp) + len(image_data)
+# TCP parameters
+dport = 80
+seq = random.randint(1, 4294967295)  # Random initial sequence number
+ack = 0  # No acknowledgment in the initial SYN packet
+max_segment_size = 1460  # Adjust this value as needed
 
-# Set the IP length field
-ip.len = ip_length
+# Calculate the TCP checksum for each segment
+segments = [
+    image_data[i : i + max_segment_size]
+    for i in range(0, len(image_data), max_segment_size)
+]
 
-# Define el paquete completo
-packet = eth / ip / tcp / Raw(load=image_data)
+packets = []
 
-# Borra los checksums para que Scapy los calcule automáticamente
-del packet[IP].chksum
-del packet[TCP].chksum
+for segment in segments:
+    # TCP segment
+    sport = random.randint(1024, 65535)
+    tcp = TCP(sport=sport, dport=dport, flags="S", seq=seq, ack=ack, chksum=0)
 
-# Recalcula los checksums
-packet = packet.__class__(bytes(packet))
+    # Calculate the TCP checksum
+    pseudo_header = struct.pack(
+        "!4s4sBBH",
+        inet_aton(ip.src),
+        inet_aton(ip.dst),
+        0,
+        ip.proto,
+        len(tcp) + len(segment),
+    )
+    tcp_len = len(tcp) + len(segment)
+    checksum = 0
 
-# Define el path del archivo .pcap
-output_pcap = "imagen.pcap"
+    # Sum pseudo-header
+    for i in range(0, len(pseudo_header), 2):
+        checksum += (pseudo_header[i] << 8) + pseudo_header[i + 1]
 
-# Escribe el paquete en el archivo .pcap
-wrpcap(output_pcap, packet)
+    # Sum TCP header
+    tcp_header_bytes = bytes(tcp)
+    for i in range(0, len(tcp_header_bytes), 2):
+        checksum += (tcp_header_bytes[i] << 8) + tcp_header_bytes[i + 1]
+
+    # Sum segment bytes (padded if necessary)
+    for i in range(0, len(segment), 2):
+        byte1 = segment[i]
+        byte2 = segment[i + 1] if i + 1 < len(segment) else 0
+        checksum += (byte1 << 8) + byte2
+
+    # Add carry to the checksum
+    while checksum >> 16:
+        checksum = (checksum & 0xFFFF) + (checksum >> 16)
+
+    # Set the checksum in the TCP header
+    tcp.chksum = socket.htons(~checksum & 0xFFFF)
+
+    # Create the final packet with the image data segment
+    packet = eth / ip / tcp / segment
+    packets.append(packet)
+
+# Save the packets to a PCAP file
+output_pcap = "ctf3_image.pcap"
+wrpcap(output_pcap, packets)
