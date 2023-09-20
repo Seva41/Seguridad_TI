@@ -8,21 +8,21 @@ with open(image_path, "rb") as image_file:
 # Define los paquetes a enviar (ethernet, ip, tcp, datos)
 eth = Ether(dst="fc:f8:ae:33:44:55", src="fc:f1:36:dd:ee:ff")
 ip = IP(
-    src="192.168.0.10",
+    src="192.168.0.15",
     dst="192.168.0.1",
     ttl=64,
     flags="DF",  # Set the Don't Fragment (DF) flag
-    id=32711,
+    id=32713,
     len=0,  # Set the length to 0 for automatic calculation
     chksum=0,
 )
 
 # Crea el paquete TCP with a valid seq number
 tcp = TCP(
-    sport=12345,
+    sport=12348,
     dport=80,
     flags="S",
-    seq=1000,  # Set a valid 32-bit sequence number
+    seq=5000,  # Set a valid 32-bit sequence number
     options=[("Timestamp", (0, 0))],
     chksum=0,
 )
@@ -50,21 +50,21 @@ with open(image_path, "rb") as image_file:
 # Define los paquetes a enviar (ethernet, ip, tcp, datos)
 eth = Ether(dst="fc:f8:ae:33:44:55", src="fc:64:ba:cc:ee:ff")
 ip = IP(
-    src="192.168.0.10",
+    src="192.168.0.18",
     dst="192.168.0.1",
     ttl=64,
     flags="DF",  # Set the Don't Fragment (DF) flag
-    id=32711,
+    id=32714,
     len=0,  # Set the length to 0 for automatic calculation
     chksum=0,
 )
 
 # Crea el paquete TCP with a valid seq number
 tcp = TCP(
-    sport=12345,
+    sport=12347,
     dport=80,
     flags="S",
-    seq=1000,  # Set a valid 32-bit sequence number
+    seq=10000,  # Set a valid 32-bit sequence number
     options=[("Timestamp", (0, 0))],
     chksum=0,
 )
@@ -92,21 +92,21 @@ with open(image_path, "rb") as image_file:
 # Define los paquetes a enviar (ethernet, ip, tcp, datos)
 eth = Ether(dst="fc:f8:ae:33:44:55", src="f8:a9:d0:dd:ab:ff")
 ip = IP(
-    src="192.168.0.10",
+    src="192.168.0.22",
     dst="192.168.0.1",
     ttl=64,
     flags="DF",  # Set the Don't Fragment (DF) flag
-    id=32711,
+    id=32715,
     len=0,  # Set the length to 0 for automatic calculation
     chksum=0,
 )
 
 # Crea el paquete TCP with a valid seq number
 tcp = TCP(
-    sport=12345,
+    sport=12346,
     dport=80,
     flags="S",
-    seq=1000,  # Set a valid 32-bit sequence number
+    seq=15000,  # Set a valid 32-bit sequence number
     options=[("Timestamp", (0, 0))],
     chksum=0,
 )
