@@ -11,18 +11,18 @@ ip = IP(
     src="192.168.0.10",
     dst="192.168.0.1",
     ttl=64,
-    flags="DF",
+    flags="DF",  # Set the Don't Fragment (DF) flag
     id=32711,
-    len=1200,
+    len=0,  # Set the length to 0 for automatic calculation
     chksum=0,
 )
 
-# Crea el paquete TCP
+# Crea el paquete TCP with a valid seq number
 tcp = TCP(
     sport=12345,
     dport=80,
     flags="S",
-    seq=1000,
+    seq=1000,  # Set a valid 32-bit sequence number
     options=[("Timestamp", (0, 0))],
     chksum=0,
 )
@@ -30,12 +30,10 @@ tcp = TCP(
 # Define el paquete completo
 packet = eth / ip / tcp / Raw(load=image_data)
 
-# Borra los checksums para que Scapy los calcule automáticamente
-del packet[IP].chksum
-del packet[TCP].chksum
-
-# Recalcula los checksums
+# Calculate the TCP checksum
+packet[TCP].chksum = 0  # Clear the existing checksum field
 packet = packet.__class__(bytes(packet))
+packet[TCP].chksum = None  # Recalculate the checksum
 
 # Define el path del archivo .pcap
 output_pcap = "imagen.pcap"
