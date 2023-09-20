@@ -13,19 +13,18 @@ ip = IP(
     ttl=64,
     flags="DF",
     id=32711,
-    len=1200,
+    len=8200,
     chksum=0,
 )
 
 # Crea el paquete TCP
-tcp = TCP(
-    sport=12345,
-    dport=80,
-    flags="S",
-    seq=1000,
-    options=[("Timestamp", (0, 0))],
-    chksum=0,
-)
+tcp = TCP(sport=12345, dport=80, flags="S", seq=1000)
+
+# Calculate the total length of the IP packet
+ip_length = len(ip) + len(tcp) + len(image_data)
+
+# Set the IP length field
+ip.len = ip_length
 
 # Define el paquete completo
 packet = eth / ip / tcp / Raw(load=image_data)
