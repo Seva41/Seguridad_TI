@@ -396,6 +396,7 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
 CTF/CT2 Viña/ANGELA_LOPEZ__CTF2.mp4.mp4
 CTF/CT2 Viña/IMG_9246.mov
 CTF/CT2 Viña/prado_sofia_ctf2.mp4
@@ -410,3 +411,13 @@ CTF/CTF3/Viña/EntregaCTF3.mp4
 .gitignore
 CTF/CT2 Viña/3767-V-TICS413-1-2-2023-Entrega CTF 2-364348.N2wHQLBL.zip.part
 CTF/CT2 Viña/3767-V-TICS413-1-2-2023-Entrega CTF 2-364348.zip
+/Laboratorios/
+CTF/CT2 Viña/
+CTF/CTF2 Stgo/
+CTF/CTF2 Viña/
+Laboratorios/
+3765-S-TICS413-1-2-2023-Entrega CTF01 - Paso a Paso [PDF]-357573.zip
+CTF/CTF2 Stgo/CTF2_Video.mp4
+CTF/CTF3/Stgo/Morel_Amparo_CTF3.mp4
+CTF/CTF3/Stgo/Pavez_Tomás_CTF3.mp4
+CTF/CTF2 Stgo/CTF2_Video.mp4
