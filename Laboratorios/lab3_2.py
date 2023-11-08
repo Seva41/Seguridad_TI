@@ -1,5 +1,5 @@
 def verificar_contraseña(entrada_usuario):
-    contraseña_secreta = "s3cr3t!aes128IV0"
+    contraseña_secreta = "s3cr3t!aes128IV1"
     return entrada_usuario == contraseña_secreta
 
 
@@ -7,7 +7,7 @@ def main():
     entrada_usuario = input("Introduce la contraseña: ")
     if verificar_contraseña(entrada_usuario):
         print("¡Contraseña correcta!")
-        print("La bandera cifrada es 4555e2932c17f23b22c977138b391a21")
+        print("La bandera cifrada es f5084c8ddabfabfb9ea2a4ee145cdeea")
     else:
         print("Contraseña incorrecta.")
 
