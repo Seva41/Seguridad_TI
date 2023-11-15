@@ -115,9 +115,10 @@ def validate_code():
 
     conn = sqlite3.connect("database.db")
     c = conn.cursor()
-    c.execute(
-        f"SELECT * FROM users WHERE username = '{username}' AND access_code = '{access_code}'"
-    )
+    # Vulnerabilidad de inyección SQL en la siguiente línea
+    query = f"SELECT * FROM users WHERE username = '{username}' AND access_code = '{access_code}'"
+
+    c.execute(query)
     result = c.fetchone()
 
     if result:
