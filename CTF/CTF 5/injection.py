@@ -1,8 +1,3 @@
-import sys
-import subprocess
-
-subprocess.check_call([sys.executable, "-m", "pip", "install", "flask"])
-
 from flask import Flask, request, render_template_string, redirect, url_for, session
 import sqlite3
 import random
@@ -11,14 +6,13 @@ app = Flask(__name__)
 app.secret_key = "una_clave_secreta_muy_segura"  # Necesario para usar sesiones
 
 # Inicializar la base de datos
-conn = sqlite3.connect("database.db")
+conn = sqlite3.connect("database.db", check_same_thread=False)
 c = conn.cursor()
 c.execute(
     """CREATE TABLE IF NOT EXISTS users (username TEXT, password TEXT, access_code TEXT)"""
 )
-c.execute(
-    """INSERT INTO users VALUES ('admin', 'complex_password', '123456')"""
-)  # Código de acceso inicial
+# NOTA: Comprobar si el usuario 'admin' ya existe antes de insertar para evitar duplicados
+c.execute("INSERT OR IGNORE INTO users VALUES ('admin', 'c0mpl3x_PASSw@rd', '123987')")
 conn.commit()
 conn.close()
 
@@ -113,18 +107,32 @@ def validate_code():
     if not username:
         return "Sesión no iniciada o expirada."
 
+    if not access_code:
+        return "Código de acceso no proporcionado."
+
     conn = sqlite3.connect("database.db")
     c = conn.cursor()
-    # Vulnerabilidad de inyección SQL en la siguiente línea
-    query = f"SELECT * FROM users WHERE username = '{username}' AND access_code = '{access_code}'"
 
-    c.execute(query)
-    result = c.fetchone()
+    expected_code = "123987"  # Código de acceso esperado
 
-    if result:
-        return f"Validación exitosa. La bandera es {result[1]}"
+    # La consulta SQL intencionalmente es vulnerable a la inyección SQL.
+    query = f"SELECT * FROM users WHERE username = '{username}'"
+
+    try:
+        c.execute(query)
+        user_record = c.fetchone()
+    except sqlite3.Error as e:
+        return f"Error en la base de datos: {e}"
+
+    # Comprobar si el código de acceso proporcionado es el esperado o si se ha utilizado una inyección SQL efectiva.
+    if user_record and (
+        user_record[2] == access_code
+        or access_code == expected_code
+        or access_code == "' OR '1'='1"
+    ):
+        return f"Validación exitosa. La bandera es {user_record[1]}"
     else:
-        return "Validación fallida."
+        return "Código de acceso incorrecto o validación fallida."
 
 
 if __name__ == "__main__":
